@@ -6,3 +6,4 @@ Built ontop of
 * borgbackup
 * gmvault
 * aconfmgr
+* megasync
