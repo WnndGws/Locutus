@@ -7,27 +7,32 @@
 # 4) Restore GoogleDrive
 
 # >>>>> CONFIGURATION SETTINGS <<<<< #
-#
-# Aconfmgr save location (must be full path)
-acm_path="/home/wynand/wynZFS/Wynand/Backups/aconfmgr"
-#
-# Drive save location (must be full path)
 
-#
+# Aconfmgr save location (must be full path)
+acm_save="/home/wynand/wynZFS/Wynand/Backups/aconfmgr"
+
+# Gmail save location (must be full path)
+gmv_path="/home/wynand/.virtualenv2/gmvault/bin/gmvault"
+gmv_save="/home/wynand/wynZFS/Wynand/Backups/Gmail"
+email_address="wynandgouwswg@gmail.com"
+
 #Location of passwords file (must be full path)
 pwf_loc="/home/wynand/.passwords.asc"   ##Need to specify format
+
 #Borg/aconf/gmvault/megasync bin location(need to set defualt paths)
+#Path to Gmvault (needs to be full path, leave blank if default)
+
 #location(s) to back up
 #ignored files/folders
-#find way to have expect statements in shell
-#
+
 # >>>>>>> END CONFIGURATION <<<<<<< #
 
 source <(gpg -qd $pwf_loc)
 export BORG_PASSPHRASE
-export mega_user
-export mega_password
-export google_password
+export SUDO_PASSPHRASE
+export MEGA_USER
+export MEGA_PASSPHRASE
+export GOOGLE_PASSPHRASE
 
 notify-send "Backup Started"""
 
@@ -37,15 +42,21 @@ notify-send "Backup Started"""
 #Create daily update of GoogleDrive
 # borg create -p -C lz4 /wynZFS/Wynand/Backups/Antergos/::"{hostname}-{now:%Y%m%d-%H%M}" /home --exclude "*cache*" --exclude /home/wynand/Downloads --exclude /home/wynand/wynZFS --exclude "*.nohup*" --exclude "*steam*" --exclude "*Steam*"
 
-# Backup Gmail in a venv
-# source /home/wynand/.virtualenv2/gmvault/bin/activate
-# /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/gmail_expect_script.exp ${google_password}
-# deactivate
+# Backup Gmail using gmvault
+expect <<- DONE
+    set timeout -1
+    spawn $gmv_path sync -e -d $gmv_save $email_address -p
+    match_max 100000
+    expect -re {Please enter gmail password for }
+    send "$GOOGLE_PASSPHRASE"
+    send -- "\r"
+    expect eof
+DONE
 
 # Save packages and configurations using aconfmgr
 expect <<- DONE
     set timeout -1
-    spawn aconfmgr -c $acm_path save
+    spawn aconfmgr -c $acm_save save
     match_max 100000
     expect -re {\[0m\[sudo\] password for }
     send "$SUDO_PASSPHRASE"
