@@ -8,6 +8,12 @@
 
 # >>>>> CONFIGURATION SETTINGS <<<<< #
 #
+# Aconfmgr save location (must be full path)
+acm_path="/home/wynand/wynZFS/Wynand/Backups/aconfmgr"
+#
+# Drive save location (must be full path)
+
+#
 #Location of passwords file (must be full path)
 pwf_loc="/home/wynand/.passwords.asc"   ##Need to specify format
 #Borg/aconf/gmvault/megasync bin location(need to set defualt paths)
@@ -25,9 +31,6 @@ export google_password
 
 notify-send "Backup Started"""
 
-# Monitor files for changes
-# inotifywait --exclude "\.changes|\.tmp\.txt" -mr -e modify -e move -e create -e delete --format "%e %w%f" /home/wynand/wynZFS/Wynand/Backups -o /home/wynand/wynZFS/Wynand/Backups/.changes &
-
 # Backup my crontab
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
@@ -39,13 +42,13 @@ notify-send "Backup Started"""
 # /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/gmail_expect_script.exp ${google_password}
 # deactivate
 
-# Save packages and configurations
+# Save packages and configurations using aconfmgr
 expect <<- DONE
     set timeout -1
-    spawn aconfmgr -c /home/wynand/wynZFS/Wynand/Backups/aconfmgr save
+    spawn aconfmgr -c $acm_path save
     match_max 100000
     expect -re {\[0m\[sudo\] password for }
-    send $BORG_PASSPHRASE
+    send "$SUDO_PASSPHRASE"
     send -- "\r"
     expect eof
 DONE
@@ -90,7 +93,6 @@ DONE
 #     echo "Uploading......."
 #   nocorrect megacopy -u ${mega_user} -p ${mega_password} -r /Root/Backups -l  /wynZFS/Wynand/Backups
 #     megasync
-fi
+# fi
 
-# kill $(pgrep inotifywait)
 # kill $(pgrep megasync)
