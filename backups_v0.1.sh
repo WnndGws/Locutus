@@ -44,8 +44,8 @@ expect <<- DONE
     set timeout -1
     spawn aconfmgr -c /home/wynand/wynZFS/Wynand/Backups/aconfmgr save
     match_max 100000
-    expect -re {^[\[0m\[sudo\] password for }
-    send -- BORG_PASSPHRASE
+    expect -re {\[0m\[sudo\] password for }
+    send $BORG_PASSPHRASE
     send -- "\r"
     expect eof
 DONE
