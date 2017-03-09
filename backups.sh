@@ -7,6 +7,19 @@ PATH=$PATH:/home/wynand/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/b
 # 3) Restore Antergos
 # 4) Restore GoogleDrive
 
+# >>>>> CONFIGURATION SETTINGS <<<<< #
+#
+#Location of passwords file
+#Borg bin location
+#location(s) to back up
+#ignored files/folders
+#find way to have expect statements in shell
+#
+# >>>>>>> END CONFIGURATION <<<<<<< #
+
+
+
+
 source <(gpg -qd /home/wynand/.passwords.asc)
 export BORG_PASSPHRASE
 export mega_user
