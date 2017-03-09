@@ -9,8 +9,8 @@
 # >>>>> CONFIGURATION SETTINGS <<<<< #
 #
 #Location of passwords file (must be full path)
-pwf_loc="/home/wynand/.passwords.asc"
-#Borg bin location
+pwf_loc="/home/wynand/.passwords.asc"   ##Need to specify format
+#Borg/aconf/gmvault/megasync bin location(need to set defualt paths)
 #location(s) to back up
 #ignored files/folders
 #find way to have expect statements in shell
@@ -29,35 +29,43 @@ notify-send "Backup Started"""
 # inotifywait --exclude "\.changes|\.tmp\.txt" -mr -e modify -e move -e create -e delete --format "%e %w%f" /home/wynand/wynZFS/Wynand/Backups -o /home/wynand/wynZFS/Wynand/Backups/.changes &
 
 # Backup my crontab
-crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
+# crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
 #Create daily update of GoogleDrive
-borg create -p -C lz4 /wynZFS/Wynand/Backups/Antergos/::"{hostname}-{now:%Y%m%d-%H%M}" /home --exclude "*cache*" --exclude /home/wynand/Downloads --exclude /home/wynand/wynZFS --exclude "*.nohup*" --exclude "*steam*" --exclude "*Steam*"
+# borg create -p -C lz4 /wynZFS/Wynand/Backups/Antergos/::"{hostname}-{now:%Y%m%d-%H%M}" /home --exclude "*cache*" --exclude /home/wynand/Downloads --exclude /home/wynand/wynZFS --exclude "*.nohup*" --exclude "*steam*" --exclude "*Steam*"
 
 # Backup Gmail in a venv
-source /home/wynand/.virtualenv2/gmvault/bin/activate
-/home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/gmail_expect_script.exp ${google_password}
-deactivate
+# source /home/wynand/.virtualenv2/gmvault/bin/activate
+# /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/gmail_expect_script.exp ${google_password}
+# deactivate
 
 # Save packages and configurations
-/home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/aconfmgr_expect_script.exp ${BORG_PASSPHRASE}
+expect <<- DONE
+    set timeout -1
+    spawn aconfmgr -c /home/wynand/wynZFS/Wynand/Backups/aconfmgr save
+    match_max 100000
+    expect -re {^[\[0m\[sudo\] password for }
+    send -- BORG_PASSPHRASE
+    send -- "\r"
+    expect eof
+DONE
 
  #Prune Backups
-echo "Pruning........."
-borg prune /wynZFS/Wynand/Backups/Antergos/ --prefix "{hostname}-" --keep-hourly=24 --keep-daily=7 --keep-weekly=4 --keep-monthly=12 --keep-yearly=10
+# echo "Pruning........."
+# borg prune /wynZFS/Wynand/Backups/Antergos/ --prefix "{hostname}-" --keep-hourly=24 --keep-daily=7 --keep-weekly=4 --keep-monthly=12 --keep-yearly=10
 
 # Check backups and alert if issues
-echo "Checking........"
-borg check /wynZFS/Wynand/Backups/Antergos/ &>> /home/wynand/wynZFS/Wynand/Backups/.tmp.txt
+# echo "Checking........"
+# borg check /wynZFS/Wynand/Backups/Antergos/ &>> /home/wynand/wynZFS/Wynand/Backups/.tmp.txt
 
-if grep -Fq "Completed repository check, errors found" /home/wynand/wynZFS/Wynand/Backups/.tmp.txt
-then
-    notify-send "Backup Error" "There was an error found in one of the Borg backups"
+# if grep -Fq "Completed repository check, errors found" /home/wynand/wynZFS/Wynand/Backups/.tmp.txt
+# then
+#     notify-send "Backup Error" "There was an error found in one of the Borg backups"
 #   rm -rf /home/wynand/wynZFS/Wynand/Backups/.tmp.txt
-    mv /home/wynand/wynZFS/Wynand/Backups/.tmp.txt /home/wynand/BorgCheck.txt
-else
-    rm -rf /home/wynand/wynZFS/Wynand/Backups/.tmp.txt
-    notify-send "Backups Checked" "All clear"
+#     mv /home/wynand/wynZFS/Wynand/Backups/.tmp.txt /home/wynand/BorgCheck.txt
+# else
+#     rm -rf /home/wynand/wynZFS/Wynand/Backups/.tmp.txt
+#     notify-send "Backups Checked" "All clear"
     # Only copy files to HDD and mega if no errors
    
 #   echo "Finding changed files..."
@@ -76,13 +84,13 @@ else
 
     echo "Copying........."
     # Copy to External Drive
-    cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
+#     cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
 
     #Upload to mega.nz
-    echo "Uploading......."
+#     echo "Uploading......."
 #   nocorrect megacopy -u ${mega_user} -p ${mega_password} -r /Root/Backups -l  /wynZFS/Wynand/Backups
-    megasync
+#     megasync
 fi
 
-#kill $(pgrep inotifywait)
-kill $(pgrep megasync)
+# kill $(pgrep inotifywait)
+# kill $(pgrep megasync)
