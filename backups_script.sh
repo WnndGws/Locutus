@@ -11,27 +11,30 @@
 # Backups save location
 backup_locationation="/home/wynand/wynZFS/Wynand/Backups"
 
-# Folders to backup
-backup_folders="/home"
+# Folder(s) to backup ##Still need to enable multiple folders
+backed_up_folders="/home"
 
-# Folders to exclude from backups
-ex_01=""
-ex_02=""
+# Folder(s) to exclude from backups (Exlude folders based on PATTERN)
+ex_01="*cache*"
+ex_02="/home/wynand/Downloads"
+ex_03="/home/wynand/wynZFS"
+ex_04="*steam*"
+ex_05="*Steam*"
 
 #Location of passwords file (must be full path, leave blank for defaults)
 password_file_locationation="/home/wynand/.passwords.asc"   ##Need to specify format
 
 # Aconfmgr (must be full paths, leave blank for defaults) ##Need to include default locations in backup_locationation
 acm_path=""
-acm_save_location="/home/wynand/wynZFS/Wynand/Backups/aconfmgr"
+acm_save_location="/aconfmgr"
 
 # Borg (must be full paths, leave blank for defaults)
 borg_path=""
-borg_save_location=""
+borg_save_location="/Antergos"
 
 # Gmail (must be full paths, leave blank for defaults)
 gmv_path="/home/wynand/.virtualenv2/gmvault/bin/gmvault"
-gmv_save_location="/home/wynand/wynZFS/Wynand/Backups/Gmail"
+gmv_save_location="/Gmail"
 email_address="wynandgouwswg@gmail.com"
 
 
@@ -56,8 +59,10 @@ notify-send "Backup Started"""
 # Backup my crontab
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
+## To exclude, create a tmp file from excludes list and use --exclude-from
 # Create backups of save locations
-borg create -p -C lz4 $backup_locationation::"{hostname}-{now:%Y%m%d-%H%M}" /home --exclude "*cache*" --exclude /home/wynand/Downloads --exclude /home/wynand/wynZFS --exclude "*.nohup*" --exclude "*steam*" --exclude "*Steam*"
+borg init $backup_location
+borg create -p -C lz4 $backup_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_folder --exclude-from 
 
 # Backup Gmail using gmvault
 expect <<- DONE
