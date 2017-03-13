@@ -8,16 +8,32 @@
 
 # >>>>> CONFIGURATION SETTINGS <<<<< #
 
-# Aconfmgr save location (must be full path)
-acm_save="/home/wynand/wynZFS/Wynand/Backups/aconfmgr"
+# Backups save location
+backup_locationation="/home/wynand/wynZFS/Wynand/Backups"
 
-# Gmail save location (must be full path)
+# Folders to backup
+backup_folders="/home"
+
+# Folders to exclude from backups
+ex_01=""
+ex_02=""
+
+#Location of passwords file (must be full path, leave blank for defaults)
+password_file_locationation="/home/wynand/.passwords.asc"   ##Need to specify format
+
+# Aconfmgr (must be full paths, leave blank for defaults) ##Need to include default locations in backup_locationation
+acm_path=""
+acm_save_location="/home/wynand/wynZFS/Wynand/Backups/aconfmgr"
+
+# Borg (must be full paths, leave blank for defaults)
+borg_path=""
+borg_save_location=""
+
+# Gmail (must be full paths, leave blank for defaults)
 gmv_path="/home/wynand/.virtualenv2/gmvault/bin/gmvault"
-gmv_save="/home/wynand/wynZFS/Wynand/Backups/Gmail"
+gmv_save_location="/home/wynand/wynZFS/Wynand/Backups/Gmail"
 email_address="wynandgouwswg@gmail.com"
 
-#Location of passwords file (must be full path)
-pwf_loc="/home/wynand/.passwords.asc"   ##Need to specify format
 
 #Borg/aconf/gmvault/megasync bin location(need to set defualt paths)
 #Path to Gmvault (needs to be full path, leave blank if default)
@@ -27,7 +43,8 @@ pwf_loc="/home/wynand/.passwords.asc"   ##Need to specify format
 
 # >>>>>>> END CONFIGURATION <<<<<<< #
 
-source <(gpg -qd $pwf_loc)
+#Need to automate import
+source <(gpg -qd $password_file_locationation)
 export BORG_PASSPHRASE
 export SUDO_PASSPHRASE
 export MEGA_USER
@@ -39,13 +56,13 @@ notify-send "Backup Started"""
 # Backup my crontab
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
-#Create daily update of GoogleDrive
-# borg create -p -C lz4 /wynZFS/Wynand/Backups/Antergos/::"{hostname}-{now:%Y%m%d-%H%M}" /home --exclude "*cache*" --exclude /home/wynand/Downloads --exclude /home/wynand/wynZFS --exclude "*.nohup*" --exclude "*steam*" --exclude "*Steam*"
+# Create backups of save locations
+borg create -p -C lz4 $backup_locationation::"{hostname}-{now:%Y%m%d-%H%M}" /home --exclude "*cache*" --exclude /home/wynand/Downloads --exclude /home/wynand/wynZFS --exclude "*.nohup*" --exclude "*steam*" --exclude "*Steam*"
 
 # Backup Gmail using gmvault
 expect <<- DONE
     set timeout -1
-    spawn $gmv_path sync -e -d $gmv_save $email_address -p
+    spawn $gmv_path sync -e -d $gmv_save_location $email_address -p
     match_max 100000
     expect -re {Please enter gmail password for }
     send "$GOOGLE_PASSPHRASE"
@@ -56,7 +73,7 @@ DONE
 # Save packages and configurations using aconfmgr
 expect <<- DONE
     set timeout -1
-    spawn aconfmgr -c $acm_save save
+    spawn aconfmgr -c $acm_save_location save
     match_max 100000
     expect -re {\[0m\[sudo\] password for }
     send "$SUDO_PASSPHRASE"
