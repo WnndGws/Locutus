@@ -1,47 +1,39 @@
 #!/bin/zsh
 
+# ---------------------------------- #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
-# >>>>> CONFIGURATION SETTINGS <<<<< #
+# ---------------------------------- #
 
-# Backups save location
-backup_locationation="/home/wynand/wynZFS/Wynand/Backups"
+# Backups save location (FULL PATH)
+backup_location="/wynZFS/Wynand/Backups"
 
-# Folder(s) to backup ##Still need to enable multiple folders
-backed_up_folder01="/home"
-backed_up_folder02=""
+# Backup folders (RELATIVE TO backup_location)
+acm_save_location="/aconfmgr"
+borg_save_location="/Antergos"
+gmv_save_location="/Gmail"
 
-# Folder(s) to exclude from backups (Exlude folders based on PATTERN)
-ex_01="*cache*"
-ex_02="/home/wynand/Downloads"
-ex_03="/home/wynand/wynZFS"
-ex_04="*steam*"
-ex_05="*Steam*"
+# Folder(s) to backup (FULL PATH)(Comma seperated list)
+backed_up_files="/home"
 
-#Location of passwords file (must be full path, leave blank for defaults)
+# Folder(s) to exclude from backups (Exlude folders based on PATTERN)(Comma seperated list)
+excluded_files="'*cache*', /home/wynand/Downloads, /home/wynand/wynZFS, '*.nohup*', '*steam*', '*Steam*'"
+
+#Location of passwords file (FULL PATH)
 password_file_location="/home/wynand/.passwords.asc"   ##Need to specify format
 
-# Aconfmgr (must be full paths, leave blank for defaults) ##Need to include default locations in backup_locationation
+# Aconfmgr (FULL PATH)(leave BLANK for default)
 acm_path=""
-acm_save_location="/aconfmgr"
 
-# Borg (must be full paths, leave blank for defaults)
+# Borg (FULL PATH)(leave BLANK for default)
 borg_path=""
-borg_save_location="/Antergos"
 
-# Gmail (must be full paths, leave blank for defaults)
+# Gmail (FULL PATH)(leave BLANK for default)
 gmv_path="/home/wynand/.virtualenv2/gmvault/bin/gmvault"
-gmv_save_location="/Gmail"
 email_address="wynandgouwswg@gmail.com"
 
-
-#Borg/aconf/gmvault/megasync bin location(need to set defualt paths)
-#Path to Gmvault (needs to be full path, leave blank if default)
-
-#location(s) to back up
-#ignored files/folders
-
+# --------------------------------- #
 # >>>>>>> END CONFIGURATION <<<<<<< #
-# >>>>>>> END CONFIGURATION <<<<<<< #
+# --------------------------------- #
 
 
 
@@ -49,11 +41,41 @@ acm_save_location=$backup_location$acm_save_location
 borg_save_location=$backup_location$borg_save_location
 gmv_save_location=$backup_location$gmv_save_location
 
-## use if statement to concatinate exceptions into a single string for borg
+excluded_files="--exclude "${excluded_files//,/\ --exclude}
+excluded_files=${excluded_files//\"/ }
+backed_up_files=${backed_up_files//,/\ }
+backed_up_files=${backed_up_files//\"/ }
 
 set -a
 source <(gpg -qd $password_file_location)
 set +a
+
+if [ -z $acm_path ]
+then
+    acm_path=$(which aconfmgr)
+    if [ $acm_path = "aconfmgr not found" ]
+    then
+        echo "ERROR: aconfmgr not found"; exit 1;
+    fi
+fi
+
+if [ -z $borg_path ]
+then
+    borg_path=$(which borg)
+    if [ $borg_path = "borg not found" ]
+    then
+        echo "ERROR: borg not found"; exit 1;
+    fi
+fi
+
+if [ -z $gmv_path ]
+then
+    gmv_path=$(which gmvault)
+    if [ $gmv_path = "gmvault not found" ]
+    then
+        echo "ERROR: gmv not found"; exit 1;
+    fi
+fi
 
 notify-send "Backup Started"""
 
@@ -63,7 +85,7 @@ notify-send "Backup Started"""
 ## To exclude, create a tmp file from excludes list and use --exclude-from
 # Create backups of save locations
 borg init $backup_location
-borg create -p -C lz4 $backup_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_folder --exclude-from 
+borg create -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files $excluded_files
 
 # Backup Gmail using gmvault
 expect <<- DONE
@@ -87,7 +109,7 @@ expect <<- DONE
     expect eof
 DONE
 
- #Prune Backups
+#Prune Backups
 # echo "Pruning........."
 # borg prune /wynZFS/Wynand/Backups/Antergos/ --prefix "{hostname}-" --keep-hourly=24 --keep-daily=7 --keep-weekly=4 --keep-monthly=12 --keep-yearly=10
 
