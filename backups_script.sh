@@ -1,18 +1,14 @@
 #!/bin/zsh
 
-# Recovery process
-# 1) Download aconfmgr files from mega
-# 2) Install and restore aconfmgr
-# 3) Restore Antergos
-# 4) Restore GoogleDrive
-
+# >>>>> CONFIGURATION SETTINGS <<<<< #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
 
 # Backups save location
 backup_locationation="/home/wynand/wynZFS/Wynand/Backups"
 
 # Folder(s) to backup ##Still need to enable multiple folders
-backed_up_folders="/home"
+backed_up_folder01="/home"
+backed_up_folder02=""
 
 # Folder(s) to exclude from backups (Exlude folders based on PATTERN)
 ex_01="*cache*"
@@ -22,7 +18,7 @@ ex_04="*steam*"
 ex_05="*Steam*"
 
 #Location of passwords file (must be full path, leave blank for defaults)
-password_file_locationation="/home/wynand/.passwords.asc"   ##Need to specify format
+password_file_location="/home/wynand/.passwords.asc"   ##Need to specify format
 
 # Aconfmgr (must be full paths, leave blank for defaults) ##Need to include default locations in backup_locationation
 acm_path=""
@@ -45,14 +41,19 @@ email_address="wynandgouwswg@gmail.com"
 #ignored files/folders
 
 # >>>>>>> END CONFIGURATION <<<<<<< #
+# >>>>>>> END CONFIGURATION <<<<<<< #
 
-#Need to automate import
-source <(gpg -qd $password_file_locationation)
-export BORG_PASSPHRASE
-export SUDO_PASSPHRASE
-export MEGA_USER
-export MEGA_PASSPHRASE
-export GOOGLE_PASSPHRASE
+
+
+acm_save_location=$backup_location$acm_save_location
+borg_save_location=$backup_location$borg_save_location
+gmv_save_location=$backup_location$gmv_save_location
+
+## use if statement to concatinate exceptions into a single string for borg
+
+set -a
+source <(gpg -qd $password_file_location)
+set +a
 
 notify-send "Backup Started"""
 
@@ -129,3 +130,6 @@ DONE
 # fi
 
 # kill $(pgrep megasync)
+
+# to clear imported variables when script quits, to attempt to prevent passwords being taken
+exec zsh
