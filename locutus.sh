@@ -17,7 +17,7 @@ backed_up_files="/home"
 
 # Folder(s) to exclude from backups (Exlude folders based on PATTERN)(Comma seperated list)
 excluded_folders="/home/wynand/Downloads, /home/wynand/wynZFS"
-excluded_paterns="*cache*, *nohup*, *steam*, *Steam*"
+excluded_patterns="*cache*, *nohup*, *steam*, *Steam*"
 
 #Location of passwords file (FULL PATH)
 password_file_location="/home/wynand/.passwords.asc"   ##Need to specify format
@@ -42,8 +42,10 @@ acm_save_location=$backup_location$acm_save_location
 borg_save_location=$backup_location$borg_save_location
 gmv_save_location=$backup_location$gmv_save_location
 
-excluded_files="--exclude "${excluded_files//,/\ --exclude}
-excluded_files=${excluded_files//\"/ }
+excluded_folders="--exclude "${excluded_folders//,/\ --exclude}
+excluded_folders=${excluded_folders//\"/ }
+excluded_patterns=${excluded_patterns//\ /}
+excluded_patterns="--exclude '"${excluded_patterns//,/\' --exclude \'}"'"
 backed_up_files=${backed_up_files//,/\ }
 backed_up_files=${backed_up_files//\"/ }
 
@@ -83,10 +85,9 @@ notify-send "Backup Started"""
 # Backup my crontab
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
-## To exclude, create a tmp file from excludes list and use --exclude-from
 # Create backups of save locations
 borg init $backup_location
-borg create -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files $excluded_files
+borg create -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files $excluded_folders $excluded_patterns
 
 # Backup Gmail using gmvault
 expect <<- DONE
