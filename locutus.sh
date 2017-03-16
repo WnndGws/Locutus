@@ -1,11 +1,11 @@
-#!/bin/zsh
+#!/bin/bash
 
 # ---------------------------------- #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
 # ---------------------------------- #
 
 # Backups save location (FULL PATH)
-backup_location="/wynZFS/Wynand/Backups"
+backup_location="/wynZFS/Wynand/TestBackups"
 
 # Backup folders (RELATIVE TO backup_location)
 acm_save_location="/aconfmgr"
@@ -16,7 +16,8 @@ gmv_save_location="/Gmail"
 backed_up_files="/home"
 
 # Folder(s) to exclude from backups (Exlude folders based on PATTERN)(Comma seperated list)
-excluded_files="'*cache*', /home/wynand/Downloads, /home/wynand/wynZFS, '*.nohup*', '*steam*', '*Steam*'"
+excluded_folders="/home/wynand/Downloads, /home/wynand/wynZFS"
+excluded_paterns="*cache*, *nohup*, *steam*, *Steam*"
 
 #Location of passwords file (FULL PATH)
 password_file_location="/home/wynand/.passwords.asc"   ##Need to specify format
@@ -154,4 +155,4 @@ DONE
 # kill $(pgrep megasync)
 
 # to clear imported variables when script quits, to attempt to prevent passwords being taken
-exec zsh
+exec bash
