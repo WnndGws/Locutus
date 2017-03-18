@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # ---------------------------------- #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
@@ -63,7 +63,7 @@ set +a
 if [ -z $acm_path ]
 then
     acm_path=$(which aconfmgr)
-    if [ $acm_path = "aconfmgr not found" ]
+    if [ "$acm_path" = "aconfmgr not found" ]
     then
         echo "ERROR: aconfmgr not found"; exit 1;
     fi
@@ -72,7 +72,7 @@ fi
 if [ -z $borg_path ]
 then
     borg_path=$(which borg)
-    if [ $borg_path = "borg not found" ]
+    if [ "$borg_path" = "borg not found" ]
     then
         echo "ERROR: borg not found"; exit 1;
     fi
@@ -81,7 +81,7 @@ fi
 if [ -z $gmv_path ]
 then
     gmv_path=$(which gmvault)
-    if [ $gmv_path = "gmvault not found" ]
+    if [ "$gmv_path" = "gmvault not found" ]
     then
         echo "ERROR: gmv not found"; exit 1;
     fi
@@ -94,29 +94,29 @@ notify-send "Backup Started"""
 
 # Create backups of save locations
 borg init $borg_save_location
-borg create $excluded_folders $excluded_patterns -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files
+borg create "$excluded_folders" "$excluded_patterns" -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files
 
 # Backup Gmail using gmvault
-#expect <<- DONE
-    #set timeout -1
-    #spawn $gmv_path sync -e -d $gmv_save_location $email_address -p
-    #match_max 100000
-    #expect -re {Please enter gmail password for }
-    #send "$GOOGLE_PASSPHRASE"
-    #send -- "\r"
-    #expect eof
-#DONE
+expect <<- DONE
+    set timeout -1
+    spawn $gmv_path sync -e -d $gmv_save_location $email_address -p
+    match_max 100000
+    expect -re {Please enter gmail password for }
+    send "$GOOGLE_PASSPHRASE"
+    send -- "\r"
+    expect eof
+DONE
 
 # Save packages and configurations using aconfmgr
-#expect <<- DONE
-    #set timeout -1
-    #spawn aconfmgr -c $acm_save_location save
-    #match_max 100000
-    #expect -re {\[0m\[sudo\] password for }
-    #send "$SUDO_PASSPHRASE"
-    #send -- "\r"
-    #expect eof
-#DONE
+expect <<- DONE
+    set timeout -1
+    spawn aconfmgr -c $acm_save_location save
+    match_max 100000
+    expect -re {\[0m\[sudo\] password for }
+    send "$SUDO_PASSPHRASE"
+    send -- "\r"
+    expect eof
+DONE
 
 # Prune Backups
 echo "Pruning........."
@@ -148,4 +148,4 @@ fi
 # kill $(pgrep megasync)
 
 # to clear imported variables when script quits, to attempt to prevent passwords being taken
-exec bash
+exec zsh
