@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # ---------------------------------- #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
@@ -52,9 +52,11 @@ gmv_save_location=$backup_location$gmv_save_location
 excluded_folders="--exclude "${excluded_folders//,/\ --exclude}
 excluded_folders=${excluded_folders//\"/ }
 excluded_patterns=${excluded_patterns//\ /}
-excluded_patterns="--exclude "${excluded_patterns//,/\ --exclude }
+excluded_patterns=${excluded_patterns//\,/\'\,}
+excluded_patterns="--exclude '"${excluded_patterns//,/\ --exclude \'}"'"
 backed_up_files=${backed_up_files//,/\ }
 backed_up_files=${backed_up_files//\"/ }
+excluded=$excluded_folders" "$excluded_patterns
 
 set -a
 source <(gpg -qd $password_file_location)
@@ -94,7 +96,7 @@ notify-send "Backup Started"""
 
 # Create backups of save locations
 borg init $borg_save_location
-borg create "$excluded_folders" "$excluded_patterns" -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files
+echo $excluded | xargs -i borg create -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files {}
 
 # Backup Gmail using gmvault
 expect <<- DONE
@@ -140,12 +142,12 @@ echo "Copying........."
 #     cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
 
     #Upload to mega.nz
-#     echo "Uploading......."
-#   nocorrect megacopy -u ${mega_user} -p ${mega_password} -r /Root/Backups -l  /wynZFS/Wynand/Backups
-#     megasync
+    echo "Uploading......."
+    megasync
 fi
 
-# kill $(pgrep megasync)
+kill $(pgrep megasync)
 
-# to clear imported variables when script quits, to attempt to prevent passwords being taken
+# to clear imported variables when script quits, to attempt to prevent passwords being takenI
+exec bash
 exec zsh
