@@ -27,6 +27,8 @@ acm_path=""
 
 # Borg (FULL PATH)(leave BLANK for default)
 borg_path=""
+borg_flags="-s -p -C lzma,9"
+# Go to http://borgbackup.readthedocs.io/en/stable/usage.html#borg-create to see all possible flags
 
 # Borg prune options
 borg_keep_hourly="24"
@@ -95,7 +97,7 @@ notify-send "Backup Started"""
 
 # Create backups of save locations
 borg init $borg_save_location
-borg create -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files --exclude-from ./.excluded.tmp
+borg create $borg_flags $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files --exclude-from ./.excluded.tmp
 rm -f ./.excluded.tmp
 
 # Backup Gmail using gmvault
