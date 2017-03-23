@@ -49,14 +49,13 @@ acm_save_location=$backup_location$acm_save_location
 borg_save_location=$backup_location$borg_save_location
 gmv_save_location=$backup_location$gmv_save_location
 
-excluded_folders="--exclude "${excluded_folders//,/\ --exclude}
-excluded_folders=${excluded_folders//\"/ }
-excluded_patterns=${excluded_patterns//\ /}
-excluded_patterns=${excluded_patterns//\,/\'\,}
-excluded_patterns="--exclude '"${excluded_patterns//,/\ --exclude \'}"'"
+excluded_folders=${excluded_folders//,/\ }
+excluded_patterns=${excluded_patterns//,/\ }
 backed_up_files=${backed_up_files//,/\ }
 backed_up_files=${backed_up_files//\"/ }
-excluded=$excluded_folders" "$excluded_patterns
+excluded=$excluded_patterns" "$excluded_folders
+echo $excluded | xargs -n1 >> ./.excluded.tmp
+
 
 set -a
 source <(gpg -qd $password_file_location)
@@ -96,7 +95,8 @@ notify-send "Backup Started"""
 
 # Create backups of save locations
 borg init $borg_save_location
-echo $excluded | xargs -i borg create -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files {}
+borg create -p -C lz4 $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files --exclude-from ./.excluded.tmp
+rm -f ./.excluded.tmp
 
 # Backup Gmail using gmvault
 expect <<- DONE
