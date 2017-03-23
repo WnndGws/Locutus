@@ -63,6 +63,8 @@ set -a
 source <(gpg -qd $password_file_location)
 set +a
 
+# if [$(borg list $borg_save_location)]
+
 if [ -z $acm_path ]
 then
     acm_path=$(which aconfmgr)
@@ -96,7 +98,6 @@ notify-send "Backup Started"""
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
 # Create backups of save locations
-borg init $borg_save_location
 borg create $borg_flags $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files --exclude-from ./.excluded.tmp
 rm -f ./.excluded.tmp
 
