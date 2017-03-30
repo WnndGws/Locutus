@@ -103,6 +103,16 @@ notify-send "Backup Started"""
 # Backup my crontab
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
+# Check if borg repo exists at save location
+borg list $borg_save_location &> .borgexiststest.tmp
+if grep -Fq "does not exist" .borgexiststest.tmp
+then
+    borg init $borg_save_location
+    rm .borgexiststest.tmp
+else
+    rm .borgexiststest.tmp
+fi
+
 # Create backups of save locations
 borg create $borg_flags $borg_save_location::"{hostname}-{now:%Y%m%d-%H%M}" $backed_up_files --exclude-from ./.excluded.tmp
 
