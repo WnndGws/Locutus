@@ -99,14 +99,18 @@ notify-send "Backup Started"""
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
 ## http://www.mikerubel.org/computers/rsync_snapshots/#Appendix
+## folder format "backup.hourly.20170405_2200"
 # Backup using rsync
 # Step 1: remove oldest backup that doesn't meet config requirements (IF IT EXISTS)
-# Step 2: move each of the middle backups down the line
+    # delete if older than year but not made on jan 1st, save protected folder by moving to backup.yearly.date, then delete if older than month but not is created on 1st and protect etc
+    # oldest_hour_allowed, oldest_day_allowed=today-max weeks, oldest_week_allowed=today-max weeks etc (date +%A)
+    oldest_hour_allowed=$(echo "$(echo "$base_keep_hourly*3600" | bc)" + ""$(date +\%s)"" | bc)
+    # for loop:
+    #    date -r /path/to/file +%s
 # Step 3: make a hardlink copy of latest backup, and move it down the line (cp -al backup.0 backup.1)
 # Step 4: rsync newest backup (rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $files_to_backup $backup_location)
 # Step 5: touch backup.0 to update its creation time
-
-# Prune rsync
+# Step 6: Use 7z to compress and pw protect all
 
 # Backup Gmail using gmvault
 expect <<- DONE
