@@ -98,15 +98,13 @@ notify-send "Backup Started"""
 # Backup my crontab
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
-## TEST IF BASE EXISTS, IF DOES THEN MAKE UPDATE
 ## http://www.mikerubel.org/computers/rsync_snapshots/#Appendix
 # Backup using rsync
-if [ ! -f "$base_save_location"/base_backup.7z ];
-then
-    rm -rf .excluded.tmp
-else
-    time_now=$(date +%Y%m%d_%H%M)
-fi
+# Step 1: remove oldest backup that doesn't meet config requirements (IF IT EXISTS)
+# Step 2: move each of the middle backups down the line
+# Step 3: make a hardlink copy of latest backup, and move it down the line (cp -al backup.0 backup.1)
+# Step 4: rsync newest backup (rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $files_to_backup $backup_location)
+# Step 5: touch backup.0 to update its creation time
 
 # Prune rsync
 
