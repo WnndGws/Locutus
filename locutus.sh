@@ -22,7 +22,7 @@ password_file_location="/home/wynand/.passwords.asc"   ##Need to specify format
 
 # Folder(s) to exclude from backups (Exlude folders based on PATTERN)(Comma seperated list)
 excluded_folders="/home/wynand/Downloads, /home/wynand/wynZFS"
-excluded_patterns="*log* *cache*, *nohup*, *steam*, *Steam*"
+excluded_patterns="*log*, *cache*, *nohup*, *steam*, *Steam*"
 
 # 7z (FULL PATH)(leave BLANK for default)
 7z_path=""
@@ -56,12 +56,10 @@ acm_save_location=$backup_location$acm_save_location
 base_save_location=$backup_location$base_save_location
 gmv_save_location=$backup_location$gmv_save_location
 
-excluded_folders=${excluded_folders//,/\ }
-excluded_patterns=${excluded_patterns//,/\ }
-backed_up_files=${backed_up_files//,/\ }
-backed_up_files=${backed_up_files//\"/ }
-excluded=$excluded_patterns" "$excluded_folders
-echo $excluded | xargs -n1 >> ./.excluded.tmp
+## need to fix this up first, can exlcude using -xr@.excluded.tmp
+excluded=$excluded_patterns", "$excluded_folders
+excluded=${excluded//\,/}
+echo $excluded | tr " " "\n" > ./.excluded.tmp
 
 set -a
 source <(gpg -qd $password_file_location)
@@ -99,9 +97,9 @@ notify-send "Backup Started"""
 # Backup my crontab
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
+## TEST IF BASE EXISTS, IF DOES THEN MAKE UPDATE
 # Backup using 7z
-7z a "$base_save_location"/base_backup.7z "$backed_up_files" -x -p
-## How do i exclude
+7z a -xr@.excluded.tmp "$base_save_location"/base_backup.7z "$backed_up_files"
 
 # Prune 7z
 
