@@ -18,15 +18,16 @@ backed_up_files="/home"
 #Location of passwords file (FULL PATH)
 password_file_location="/home/wynand/.passwords.asc"   ##Need to specify format
 
-## >>>>>>>>>>>>>>>>>>>>>>>>>>>> 7z SETTINGS <<<<<<<<<<<<<<<<<<<<<<<<<<<<< ##
+## >>>>>>>>>>>>>>>>>>>>>>>>>>>> RSYNC SETTINGS <<<<<<<<<<<<<<<<<<<<<<<<<<<<< ##
 
 # Folder(s) to exclude from backups (Exlude folders based on PATTERN)(Comma seperated list)
 excluded_folders="/home/wynand/Downloads, /home/wynand/wynZFS"
-excluded_patterns="*log*, *cache*, *nohup*, *steam*, *Steam*"
+excluded_patterns="*log*, *cache*, *Cache*, *nohup*, *steam*, *Steam*"
+## Need to add capitals etc to this list so user doesn't have to
 
-# 7z (FULL PATH)(leave BLANK for default)
-7z_path=""
-7z_flags=""
+# rsync (FULL PATH)(leave BLANK for default)
+rsync_path=""
+rsync_flags=""
 
 # Base prune options
 base_keep_hourly="24"
@@ -76,10 +77,10 @@ fi
 
 if [ -z $base_path ]
 then
-    base_path=$(which 7z)
-    if [ "$base_path" = "7z not found" ]
+    base_path=$(which rsync)
+    if [ "$base_path" = "rsync not found" ]
     then
-        echo "ERROR: 7z not found"; exit 1;
+        echo "ERROR: rsync not found"; exit 1;
     fi
 fi
 
@@ -98,10 +99,16 @@ notify-send "Backup Started"""
 # crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
 ## TEST IF BASE EXISTS, IF DOES THEN MAKE UPDATE
-# Backup using 7z
-7z a -xr@.excluded.tmp "$base_save_location"/base_backup.7z "$backed_up_files"
+## http://www.mikerubel.org/computers/rsync_snapshots/#Appendix
+# Backup using rsync
+if [ ! -f "$base_save_location"/base_backup.7z ];
+then
+    rm -rf .excluded.tmp
+else
+    time_now=$(date +%Y%m%d_%H%M)
+fi
 
-# Prune 7z
+# Prune rsync
 
 # Backup Gmail using gmvault
 expect <<- DONE
@@ -124,6 +131,11 @@ expect <<- DONE
     send -- "\r"
     expect eof
 DONE
+
+if [ -f "$acm_save_location"/99-unsorted.sh ];
+then
+    notify-send "The file 99-unsorted exists in your aconfmgr folder" "You should sort the entries of it into individual files"
+fi
 
 # Copy to External Drive
 echo "Copying........."
