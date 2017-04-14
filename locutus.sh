@@ -66,6 +66,12 @@ set -a
 source <(gpg -qd $password_file_location)
 set +a
 
+expect_path=$(which expect)
+if [ "$expect_path" = "expect not found" ]
+then
+    echo "ERROR: expect not found"; exit 1;
+fi
+
 if [ -z $acm_path ]
 then
     acm_path=$(which aconfmgr)
