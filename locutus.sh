@@ -222,7 +222,7 @@ expect <<- DONE
     match_max 100000
     expect -re {Please enter gmail password for }
     send "$GOOGLE_PASSPHRASE"
-    GOOGLE_PASSPHRASE=""
+    set GOOGLE_PASSPHRASE ""
     send -- "\r"
     expect eof
 DONE
@@ -234,7 +234,7 @@ expect <<- DONE
     match_max 100000
     expect -re {\[0m\[sudo\] password for }
     send "$SUDO_PASSPHRASE"
-    SUDO_PASSPHRASE=""
+    set SUDO_PASSPHRASE ""
     send -- "\r"
     expect eof
 DONE
