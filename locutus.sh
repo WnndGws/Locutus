@@ -223,6 +223,7 @@ expect <<- DONE
     expect -re {Please enter gmail password for }
     send "$GOOGLE_PASSPHRASE"
     send -- "\r"
+    setenv GOOGLE_PASSPHRASE ""
     expect eof
 DONE
 
@@ -234,6 +235,7 @@ expect <<- DONE
     expect -re {\[0m\[sudo\] password for }
     send "$SUDO_PASSPHRASE"
     send -- "\r"
+    setenv SUDO_PASSPHRASE ""
     expect eof
 DONE
 
@@ -249,6 +251,7 @@ echo "Copying........."
 #Upload to mega.nz
 echo "Uploading......."
 megasync
+MEGA_PASSPHRASE = ""
 
 kill $(pgrep megasync)
 find -iname "*.tmp" -delete
