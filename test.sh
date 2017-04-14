@@ -68,7 +68,6 @@ set +a
 
 # Backup using rsync
 # Step 1: remove oldest backup that doesn't meet config requirements (IF IT EXISTS)
-
 oldest_hour_allowed=$(( $(date +%s) - $(echo "$base_keep_hourly*3600" | bc ) ))
 oldest_day_allowed=$(( $(date +%s) - $(echo "$base_keep_daily*3600*24" | bc ) ))
 oldest_week_allowed=$(( $(date +%s) - $(echo "$base_keep_weekly*3600*24*7" | bc ) ))
@@ -77,7 +76,7 @@ oldest_year_allowed=$(( $(date +%s) - $(echo "$base_keep_yearly*3600*24*366" | b
 
 for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*hourly*")
 do
-    folder_age=$(echo $folder | rev | cut -c1-27 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
+    folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -le $oldest_hour_allowed ]; then
         echo "Too old"
         mv $folder $(echo "$folder" | sed -e 's/hourly/daily/g')
@@ -86,7 +85,7 @@ done
 
 for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*daily*")
 do
-    folder_age=$(echo $folder | rev | cut -c1-26 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
+    folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -le $oldest_day_allowed ]; then
         echo "Too old"
         mv $folder $(echo "$folder" | sed -e 's/daily/weekly/g')
@@ -95,7 +94,7 @@ done
 
 for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*weekly*")
 do
-    folder_age=$(echo $folder | rev | cut -c1-27 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
+    folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -le $oldest_week_allowed ]; then
         echo "Too old"
         mv $folder $(echo "$folder" | sed -e 's/weekly/monthly/g')
@@ -104,7 +103,7 @@ done
 
 for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*monthly*")
 do
-    folder_age=$(echo $folder | rev | cut -c1-28 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
+    folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -le $oldest_month_allowed ]; then
         echo "Too old"
         mv $folder $(echo "$folder" | sed -e 's/monthly/yearly/g')
@@ -112,6 +111,8 @@ do
 done
 
 ## now have list of which folders qualify for each category, now need to prune them
+## find folders that have the same hour and delete the older ones, count the amount of hourlies, trim to match
+
 
 # Step 3: make a hardlink copy of latest backup, and move it down the line (cp -al backup.0 backup.1)
 # Step 4: rsync newest backup (rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $files_to_backup $backup_location)

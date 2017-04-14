@@ -113,11 +113,12 @@ notify-send "Backup Started"""
     # for loop:
     #    date -r /path/to/file +%s
 
-for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d)
+for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*hour*")
 do
     folder_age=$(echo $folder | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -ge $oldest_hour_allowed ]; then
         echo "Too old"
+        mv $folder $( echo $folder | sed 's/hourly/daily/g' )
     fi
 done
 
