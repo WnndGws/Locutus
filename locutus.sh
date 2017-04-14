@@ -102,30 +102,112 @@ notify-send "Backup Started"""
 ## folder format "backup.hourly.20170405_2200"
 ## date -d "20170405 2200" +%s gives time since epoch, change the +%s for other info
 
-# Backup using rsync
-# Step 1: remove oldest backup that doesn't meet config requirements (IF IT EXISTS)
-    # delete if older than year but not made on jan 1st, save protected folder by moving to backup.yearly.date, then delete if older than month but not is created on 1st and protect etc
-    oldest_hour_allowed=$(echo "$(echo "$base_keep_hourly*3600" | bc)" + ""$(date +\%s)"" | bc)
-    oldest_day_allowed=$(echo "$(echo "$base_keep_daily*3600*24" | bc)" + ""$(date +\%s)"" | bc)
-    oldest_week_allowed=$(echo "$(echo "$base_keep_weekly*3600*24*7" | bc)" + ""$(date +\%s)"" | bc)
-    oldest_month_allowed=$(echo "$(echo "$base_keep_weekly*3600*24*31" | bc)" + ""$(date +\%s)"" | bc)
-    oldest_year_allowed=$(echo "$(echo "$base_keep_weekly*3600*24*366" | bc)" + ""$(date +\%s)"" | bc)
-    # for loop:
-    #    date -r /path/to/file +%s
+# Backup using rsync (initial if statement tests if folder is empty)
+if [ "$(ls -A $base_save_location)" ]; then
+    # Step 1: remove oldest backup that doesn't meet config requirements (IF IT EXISTS)
+    oldest_hour_allowed=$(( $(date +%s) - $(echo "$base_keep_hourly*3600" | bc ) ))
+    oldest_day_allowed=$(( $(date +%s) - $(echo "$base_keep_daily*3600*24" | bc ) ))
+    oldest_week_allowed=$(( $(date +%s) - $(echo "$base_keep_weekly*3600*24*7" | bc ) ))
+    oldest_month_allowed=$(( $(date +%s) - $(echo "$base_keep_monthly*3600*24*31" | bc ) ))
+    oldest_year_allowed=$(( $(date +%s) - $(echo "$base_keep_yearly*3600*24*366" | bc ) ))
 
-for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*hour*")
-do
-    folder_age=$(echo $folder | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
-    if [ $folder_age -ge $oldest_hour_allowed ]; then
-        echo "Too old"
-        mv $folder $( echo $folder | sed 's/hourly/daily/g' )
-    fi
-done
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*hourly*")
+    do
+        folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
+        if [ $folder_age -le $oldest_hour_allowed ]; then
+            mv $folder $(echo "$folder" | sed -e 's/hourly/daily/g')
+        fi
+    done
 
-# Step 3: make a hardlink copy of latest backup, and move it down the line (cp -al backup.0 backup.1)
-# Step 4: rsync newest backup (rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $files_to_backup $backup_location)
-# Step 5: touch backup.0 to update its creation time
-# Step 6: Use 7z to compress and pw protect all
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*daily*")
+    do
+        folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
+        if [ $folder_age -le $oldest_day_allowed ]; then
+            mv $folder $(echo "$folder" | sed -e 's/daily/weekly/g')
+        fi
+    done
+
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*weekly*")
+    do
+        folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
+        if [ $folder_age -le $oldest_week_allowed ]; then
+            mv $folder $(echo "$folder" | sed -e 's/weekly/monthly/g')
+        fi
+    done
+
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*monthly*")
+    do
+        folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
+        if [ $folder_age -le $oldest_month_allowed ]; then
+            mv $folder $(echo "$folder" | sed -e 's/monthly/yearly/g')
+        fi
+    done
+
+    # Now only have the folders which are the correct age, need to trim them next
+
+    touch .saved_folders.tmp
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*hourly*" )
+    do
+        folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | cut -c 1-11 | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%H)
+        if grep -Fxq $folder_age .saved_folders.tmp; then
+            rm -rf $folder
+        else
+            echo $folder_age >> .saved_folders.tmp
+        fi
+    done
+    rm .saved_folders.tmp
+
+    touch .saved_folders.tmp
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*daily*" )
+    do
+        folder_age=$(echo $folder |rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | cut -d'_' -f1)
+        if grep -Fxq $folder_age .saved_folders.tmp; then
+            rm -rf $folder
+        else
+            echo $folder_age >> .saved_folders.tmp
+        fi
+    done
+    rm .saved_folders.tmp
+
+    touch .saved_folders.tmp
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*weekly*" )
+    do
+        folder_age=$(echo $folder |rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | cut -d'_' -f1 | xargs -i date -d {} +%U)
+        if grep -Fxq $folder_age .saved_folders.tmp; then
+            rm -rf $folder
+        else
+            echo $folder_age >> .saved_folders.tmp
+        fi
+    done
+    rm .saved_folders.tmp
+
+    touch .saved_folders.tmp
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*monthly*" )
+    do
+        folder_age=$(echo $folder |rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | cut -d'_' -f1 | xargs -i date -d {} +%m)
+        if grep -Fxq $folder_age .saved_folders.tmp; then
+            rm -rf $folder
+        else
+            echo $folder_age >> .saved_folders.tmp
+        fi
+    done
+    rm .saved_folders.tmp
+
+    # Step 2: make a hardlink copy of latest backup, and move it down the line (cp -al backup.0 backup.1)
+    latest_backup=$(ls -t $base_save_location | head -1 )
+    cp -la $base_save_location/$latest_backup $base_save_location/$latest_backup.linked
+    mv $base_save_location/$latest_backup $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly"
+    mv $base_save_location/$latest_backup.linked $base_save_location/$latest_backup
+
+    # Step 3: rsync newest backup (rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $files_to_backup $backup_location)
+    rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $backed_up_files $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly"
+
+    # Step 4: Use 7z to compress and pw protect all
+
+else
+    rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $backed_up_files $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly"
+fi
+rm -rf ./.excluded.tmp
 
 # Backup Gmail using gmvault
 expect <<- DONE
