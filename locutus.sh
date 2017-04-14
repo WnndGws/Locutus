@@ -62,10 +62,6 @@ excluded=$excluded_patterns", "$excluded_folders
 excluded=${excluded//\,/}
 echo $excluded | tr " " "\n" > ./.excluded.tmp
 
-set -a
-source <(gpg -qd $password_file_location)
-set +a
-
 expect_path=$(which expect)
 if [ "$expect_path" = "expect not found" ]
 then
@@ -215,6 +211,10 @@ else
 fi
 rm -rf ./.excluded.tmp
 
+set -a
+source <(gpg -qd $password_file_location)
+set +a
+
 # Backup Gmail using gmvault
 expect <<- DONE
     set timeout -1
@@ -222,8 +222,8 @@ expect <<- DONE
     match_max 100000
     expect -re {Please enter gmail password for }
     send "$GOOGLE_PASSPHRASE"
+    GOOGLE_PASSPHRASE=""
     send -- "\r"
-    setenv GOOGLE_PASSPHRASE ""
     expect eof
 DONE
 
@@ -234,8 +234,8 @@ expect <<- DONE
     match_max 100000
     expect -re {\[0m\[sudo\] password for }
     send "$SUDO_PASSPHRASE"
+    SUDO_PASSPHRASE=""
     send -- "\r"
-    setenv SUDO_PASSPHRASE ""
     expect eof
 DONE
 
@@ -251,7 +251,6 @@ echo "Copying........."
 #Upload to mega.nz
 echo "Uploading......."
 megasync
-MEGA_PASSPHRASE = ""
 
 kill $(pgrep megasync)
 find -iname "*.tmp" -delete
