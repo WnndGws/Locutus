@@ -78,7 +78,6 @@ for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname 
 do
     folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -le $oldest_hour_allowed ]; then
-        echo "Too old"
         mv $folder $(echo "$folder" | sed -e 's/hourly/daily/g')
     fi
 done
@@ -87,7 +86,6 @@ for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname 
 do
     folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -le $oldest_day_allowed ]; then
-        echo "Too old"
         mv $folder $(echo "$folder" | sed -e 's/daily/weekly/g')
     fi
 done
@@ -96,7 +94,6 @@ for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname 
 do
     folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -le $oldest_week_allowed ]; then
-        echo "Too old"
         mv $folder $(echo "$folder" | sed -e 's/weekly/monthly/g')
     fi
 done
@@ -105,7 +102,6 @@ for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname 
 do
     folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
     if [ $folder_age -le $oldest_month_allowed ]; then
-        echo "Too old"
         mv $folder $(echo "$folder" | sed -e 's/monthly/yearly/g')
     fi
 done
@@ -113,6 +109,35 @@ done
 ## now have list of which folders qualify for each category, now need to prune them
 ## find folders that have the same hour and delete the older ones, count the amount of hourlies, trim to match
 
+#hourly_folders=
+
+## instead of using a list, just use a tmp file
+touch .saved_folders.tmp
+for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*daily*")
+do
+    folder_age=$(echo $folder |rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | cut -d'_' -f1)
+    if grep -Fxq $folder_age .saved_folders.tmp; then
+        echo $folder >> removed.tmp
+        rm -rf $folder
+    else
+        echo $folder_age >> .saved_folders.tmp
+    fi
+done
+rm .saved_folders.tmp
+
+touch .saved_folders.tmp
+for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*weekly*")
+do
+    folder_age=$(echo $folder |rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | cut -d'_' -f1 | xargs -i date -d {} +%V)
+    ## currently keeps newest from that day, want to keep oldest
+    if grep -Fxq $folder_age .saved_folders.tmp; then
+        echo $folder >> removed.tmp
+        rm -rf $folder
+    else
+        echo $folder_age >> .saved_folders.tmp
+    fi
+done
+#rm .saved_folders.tmp
 
 # Step 3: make a hardlink copy of latest backup, and move it down the line (cp -al backup.0 backup.1)
 # Step 4: rsync newest backup (rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $files_to_backup $backup_location)
