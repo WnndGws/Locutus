@@ -19,6 +19,7 @@ Step to use:
     * NB! This file contains SENSITIVE INFORMATION. That is why it is imperative that you encrypt it using gpg
     * Minimum suggested: "gpg -ea .passwords.txt"
     * Shred original file before removing it using "shred" in terminal
+    * This process should leave you with a file ".passwords.asc" which you need to reference in the config section of locutus
  3) chmod +x "locutus.sh"
  4) Run locutus.sh as per any other .sh file
  
