@@ -16,7 +16,10 @@ gmv_save_location="/Gmail"
 backed_up_files="/home"
 
 #Location of passwords file (FULL PATH)
-password_file_location="/home/wynand/.passwords.asc"   ##Need to specify format
+password_file_location="/home/wynand/.passwords.asc"
+
+#Path to cloud upload application (I prefer to use the official apps instead of a cli, as these apps have been optimised for the OS, and allows you to set up where to back the data up etc.)
+cloud_path="/usr/bin/megasync"
 
 ## >>>>>>>>>>>>>>>>>>>>>>>>>>>> RSYNC SETTINGS <<<<<<<<<<<<<<<<<<<<<<<<<<<<< ##
 
@@ -35,7 +38,6 @@ base_keep_daily="7"
 base_keep_weekly="4"
 base_keep_monthly="12"
 base_keep_yearly="10"
-
 
 ## >>>>>>>>>>>>>>>>>>>>>>>>>> ACONF SETTINGS <<<<<<<<<<<<<<<<<<<<<<<<<<< ##
 # Aconfmgr (FULL PATH)(leave BLANK for default)
@@ -98,11 +100,9 @@ fi
 notify-send "Backup Started"""
 
 # Backup my crontab
-# crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
+crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
 ## http://www.mikerubel.org/computers/rsync_snapshots/#Appendix
-## folder format "backup.hourly.20170405_2200"
-## date -d "20170405 2200" +%s gives time since epoch, change the +%s for other info
 
 # Backup using rsync (initial if statement tests if folder is empty)
 if [ "$(ls -A $base_save_location)" ]; then
@@ -250,11 +250,11 @@ echo "Copying........."
 
 #Upload to mega.nz
 echo "Uploading......."
-megasync
+megasync 2>&1 /dev/null
 
 kill $(pgrep megasync)
 find -iname "*.tmp" -delete
 
-# to clear imported variables when script quits, to attempt to prevent passwords being takenI
+# to clear imported variables when script quits, to attempt to prevent passwords being taken
 exec bash
 exec zsh
