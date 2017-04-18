@@ -46,7 +46,7 @@ acm_flags=""
 
 ## >>>>>>>>>>>>>>>>>>>>>>>>>> GMAIL SETTINGS <<<<<<<<<<<<<<<<<<<<<<<<<<< ##
 # Gmail (FULL PATH)(leave BLANK for default)
-gmv_path="/home/wynand/.virtualenv2/gmvault/bin/gmvault"
+gmv_path="/home/wynand/.virtualenvs/gmvault/bin/gmvault"
 email_address="wynandgouwswg@gmail.com"
 
 # --------------------------------- #
