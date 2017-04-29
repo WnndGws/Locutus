@@ -218,7 +218,7 @@ set +a
 # Backup Gmail using gmvault
 expect <<- DONE
     set timeout -1
-    spawn $gmv_path sync -e -d $gmv_save_location $email_address -p
+    spawn $gmv_path sync --emails-only -e -d $gmv_save_location $email_address -p
     match_max 100000
     expect -re {Please enter gmail password for }
     send "$GOOGLE_PASSPHRASE"
