@@ -227,6 +227,8 @@ expect <<- DONE
     expect eof
 DONE
 
+rm -rf "$acm_save_location"/files
+rm -f "$acm_save_location"/04-AddFiles.sh
 # Save packages and configurations using aconfmgr
 expect <<- DONE
     set timeout -1
@@ -241,7 +243,12 @@ DONE
 
 if [ -f "$acm_save_location"/99-unsorted.sh ];
 then
-    notify-send "The file 99-unsorted exists in your aconfmgr folder" "You should sort the entries of it into individual files"
+    cat "$acm_save_location"/99-unsorted.sh | grep 'C.*File ' >> 98.tmp; cat "$acm_save_location"/99-unsorted.sh | grep 'C.*Link ' >> 98.tmp; sort 98.tmp | uniq -u >> 04-AddFiles.sh; rm -f 98.tmp
+    cat "$acm_save_location"/99-unsorted.sh | grep 'AddPackage ' >> 98.tmp; sort 98.tmp | uniq -u >> 02-Packages.sh; rm -f 98.tmp
+    cat "$acm_save_location"/99-unsorted.sh | grep 'RemovePackage ' >> 98.tmp; sort 98.tmp | uniq -u >> 05-RemovePackages.sh; rm -f 98.tmp
+    cat "$acm_save_location"/02-Packages.sh | grep '--foreign' >> 98.tmp; sort 98.tmp | uniq -u >> 03-ForeignPackages.sh; rm -f 98.tmp
+    sed -i '/--foreign/d' 02-Packages.sh
+    rm -f "$acm_save_location"/99-unsorted.sh
 fi
 
 # Copy to External Drive
@@ -250,11 +257,11 @@ echo "Copying........."
 
 #Upload to mega.nz
 echo "Uploading......."
-megasync 2>&1 /dev/null
+# megasync 2>&1 /dev/null
 
-kill $(pgrep megasync)
-find -iname "*.tmp" -delete
+# kill $(pgrep megasync) 2>&1 /dev/null
+find -iname "*.tmp" -delete 2>&1 /dev/null
 
 # to clear imported variables when script quits, to attempt to prevent passwords being taken
-exec bash
-exec zsh
+exec bash 2>&1 /dev/null
+exec zsh 2>&1 /dev/null
