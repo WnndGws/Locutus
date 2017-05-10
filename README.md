@@ -1,3 +1,7 @@
+# Branch Details
+
+The point of this branch is to change the way the backup is done. Will create a base and compare to that. Will be much slower, but will mean that uploads will be smaller. Will compare the trade-off and decide if want to pull
+
 # Locutus
 
 Still in v0.x. Use at your own risk Ammar. When i think it is ready to be used i will make a v1.0 release.
