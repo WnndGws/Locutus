@@ -109,7 +109,7 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
     ## b) if does exist, extract and diff backup folder and create backup
 ## Step 02) Trim as per locutus v0.4
 
-if [ ! -d $base_save_location/"backup.base" ];
+if t[ ! -d $base_save_location/"backup.base" ];
 then
     rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $backed_up_files $base_save_location/"backup.base"
 else
