@@ -9,14 +9,14 @@ backup_location="/wynZFS/Wynand/Backups"
 
 # Backup folders (RELATIVE TO backup_location)
 acm_save_location="/aconfmgr"
-base_save_location="/Antergos"
+base_save_location="/Antergos_base"
 gmv_save_location="/Gmail"
 
 # Folder(s) to backup (FULL PATH)(Comma seperated list)
 backed_up_files="/home"
 
 #Location of passwords file (FULL PATH)
-password_file_location="/home/wynand/.passwords.asc"
+password_file_location="/home/wynand/.dotfiles/.passwords.asc"
 
 #Path to cloud upload application (I prefer to use the official apps instead of a cli, as these apps have been optimised for the OS, and allows you to set up where to back the data up etc.)
 cloud_path="/usr/bin/megasync"
@@ -104,6 +104,17 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
 
 # Need to change the way backup is done, by creating base folder and referencing it.
 ## How will we trim the base?
+## Step 01) test is base exists
+    ## a) if doesn't exist create
+    ## b) if does exist, extract and diff backup folder and create backup
+## Step 02) Trim as per locutus v0.4
+
+if [ ! -d $base_save_location/"backup.base" ];
+then
+    rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $backed_up_files $base_save_location/"backup.base"
+else
+    rsync -va --delete --delete-excluded --exclude-from .excluded.tmp --compare-dest=$base_save_location/"backup.base" $backed_up_files $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly"
+fi
 
 set -a
 source <(gpg -qd $password_file_location)
@@ -158,4 +169,4 @@ find -iname "*.tmp" -delete
 
 # to clear imported variables when script quits, to attempt to prevent passwords being taken
 exec bash 2>&1 /dev/null
-exec zsh 2>&1 /dev/null
+exec $SHELL
