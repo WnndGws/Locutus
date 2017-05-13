@@ -99,6 +99,10 @@ fi
 
 notify-send "Backup Started"""
 
+set -a
+source <(gpg -qd $password_file_location)
+set +a
+
 # Backup my crontab
 crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
@@ -109,16 +113,17 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
     ## b) if does exist, extract and diff backup folder and create backup
 ## Step 02) Trim as per locutus v0.4
 
-if t[ ! -d $base_save_location/"backup.base" ];
+if [ ! -d $base_save_location/"backup.base" ];
 then
     rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $backed_up_files $base_save_location/"backup.base"
+    cp -r $base_save_location/"backup.base" $base_save_location/".backup.base.bak"
+    7z a -y -m0=lzma -mx=9 $base_save_location/"backup.base.7z" $base_save_location/"backup.base"
+    echo "Uploading......."
 else
-    rsync -va --delete --delete-excluded --exclude-from .excluded.tmp --compare-dest=$base_save_location/"backup.base" $backed_up_files $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly"
+    ## need to copy all files recursively so that it compares to latest update
+    echo "Uploading......."
 fi
 
-set -a
-source <(gpg -qd $password_file_location)
-set +a
 
 # Backup Gmail using gmvault
 expect <<- DONE
@@ -160,11 +165,6 @@ fi
 echo "Copying........."
 #     cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
 
-#Upload to mega.nz
-echo "Uploading......."
-# megasync 2>&1 /dev/null
-
-# kill $(pgrep megasync) 2>&1 /dev/null
 find -iname "*.tmp" -delete
 
 # to clear imported variables when script quits, to attempt to prevent passwords being taken
