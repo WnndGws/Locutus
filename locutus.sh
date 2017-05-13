@@ -117,7 +117,7 @@ if [ ! -d $base_save_location/"backup.base" ];
 then
     rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $backed_up_files $base_save_location/"backup.base"
     cp -r $base_save_location/"backup.base" $base_save_location/".backup.base.bak"
-    7z a -y -m0=lzma -mx=9 $base_save_location/"backup.base.7z" $base_save_location/"backup.base" -p=$BACKUP_PASSPHRASE
+    7z a -y -m0=lzma -mx=9 $base_save_location/"backup.base.7z" $base_save_location/"backup.base" -p="$BACKUP_PASSPHRASE"
     echo "Uploading......."
 else
     ## need to copy all files recursively so that it compares to latest update
