@@ -113,15 +113,42 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
     ## b) if does exist, extract and diff backup folder and create backup
 ## Step 02) Trim as per locutus v0.4
 
+backup_extract () (
+    if [ -f $base_save_location/backup.current.7z ];
+    then
+        7z x $base_save_location/backup.current.7z -p="$BACKUP_PASSPHRASE" -o=$base_save_location
+    else
+        7z x $base_save_location/backup.base.7z -p="$BACKUP_PASSPHRASE" -o=$base_save_location
+        mv $base_save_location/backup.base $base_save_location/backup.current
+    fi
+
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*yearly*"); do
+        cp -rfv $folder/. $base_save_location/"backup.current"
+    done
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*monthly*"); do
+        cp -rfv $folder/. $base_save_location/"backup.current"
+    done
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*weekly*"); do
+        cp -rfv $folder/. $base_save_location/"backup.current"
+    done
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*daily*"); do
+        cp -rfv $folder/. $base_save_location/"backup.current"
+    done
+    for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*hourly*"); do
+        cp -rfv $folder/. $base_save_location/"backup.current"
+    done
+)
+
 if [ ! -d $base_save_location/"backup.base" ];
 then
     rsync -va --delete --delete-excluded --exclude-from .excluded.tmp $backed_up_files $base_save_location/"backup.base"
-    cp -r $base_save_location/"backup.base" $base_save_location/".backup.base.bak"
+    cp -rfv $base_save_location/backup.base $base_save_location/backup.current
     7z a -y -m0=lzma -mx=9 $base_save_location/"backup.base.7z" $base_save_location/"backup.base" -p="$BACKUP_PASSPHRASE"
+    7z a -y -m0=lzma -mx=9 $base_save_location/"backup.current.7z" $base_save_location/"backup.current" -p="$BACKUP_PASSPHRASE"
     echo "Uploading......."
 else
-    ## need to copy all files recursively so that it compares to latest update
-    rsync -va --delete --delete-excluded --exclude-from .excluded.tmp --compare-dest=$base_save_location/"backup.base" $backed_up_files $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly"
+    backup_extract
+    rsync -vrcm --delete --delete-excluded --exclude-from .excluded.tmp --compare-dest=$base_save_location/backup.current $backed_up_files $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly"
     for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*hourly*")
     do
         folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
