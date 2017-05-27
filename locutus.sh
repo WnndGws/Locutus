@@ -114,13 +114,13 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
 ## Step 02) Trim as per locutus v0.4
 
 backup_extract () (
-    if [ -f $base_save_location/backup.current.7z ];
-    then
-        7z x $base_save_location/backup.current.7z -p="$BACKUP_PASSPHRASE" -o=$base_save_location
-    else
-        7z x $base_save_location/backup.base.7z -p="$BACKUP_PASSPHRASE" -o=$base_save_location
-        mv $base_save_location/backup.base $base_save_location/backup.current
-    fi
+#   if [ -f $base_save_location/backup.current.7z ];
+#   then
+#       7z x $base_save_location/backup.current.7z -p="$BACKUP_PASSPHRASE" -o$base_save_location
+#   else
+#       7z x $base_save_location/backup.base.7z -p="$BACKUP_PASSPHRASE" -o$base_save_location
+#       mv $base_save_location/backup.base $base_save_location/backup.current
+#   fi
 
     for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*yearly*"); do
         cp -rfv $folder/. $base_save_location/"backup.current"
@@ -148,7 +148,7 @@ then
     echo "Uploading......."
 else
     backup_extract
-    rsync -vrcm --delete --delete-excluded --exclude-from .excluded.tmp --compare-dest=$base_save_location/backup.current $backed_up_files $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly"
+    rsync -vrcm --delete --delete-excluded --exclude-from .excluded.tmp --compare-dest=$base_save_location/backup.current/ $backed_up_files/ $base_save_location/"backup.$(date +'%Y%m%d_%H%M').hourly/"
     for folder in $(find $base_save_location -maxdepth 1 -mindepth 1 -type d -iname "*hourly*")
     do
         folder_age=$(echo $folder | rev | cut -d'/' -f1 | rev | cut -c1-20 | rev | cut -c1-13 | rev | sed -e 's/_/\\\ /g' | xargs -i date -d {} +%s)
