@@ -71,10 +71,6 @@ fi
 
 notify-send "Backup Started"
 
-set -a
-source <(gpg -qd $password_file_location)
-set +a
-
 # Backup my crontab
 crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
@@ -82,13 +78,17 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
 deja-dup --backup 2>&1 /dev/null
 
 # Backup Gmail using gmvault
+set -a
+source <(gpg -qd $password_file_location)
+set +a
+unset SUDO_PASSPHRASE
 expect <<- DONE
     set timeout -1
     spawn $gmv_path sync --emails-only -e -d $gmv_save_location $email_address -p
     match_max 100000
     expect -re {Please enter gmail password for }
     send "$GOOGLE_PASSPHRASE"
-    set GOOGLE_PASSPHRASE ""
+    unset GOOGLE_PASSPHRASE
     send -- "\r"
     expect eof
 DONE
@@ -97,13 +97,17 @@ rm -rf "$acm_save_location"/files
 rm -f "$acm_save_location"/04-AddFiles.sh
 
 # Save packages and configurations using aconfmgr
+set -a
+source <(gpg -qd $password_file_location)
+set +a
+unset GOOGLE_PASSPHRASE
 expect <<- DONE
     set timeout -1
     spawn aconfmgr -c $acm_save_location save
     match_max 100000
     expect -re {\[0m\[sudo\] password for }
     send "$SUDO_PASSPHRASE"
-    set SUDO_PASSPHRASE ""
+    unset SUDO_PASSPHRASE
     send -- "\r"
     expect eof
 DONE
@@ -125,5 +129,5 @@ fi
 find -iname "*.tmp" -delete
 #
 ## to clear imported variables when script quits, to attempt to prevent passwords being taken
-#exec bash 2>&1 /dev/null
-#####################exec $SHELL
+exec bash 2>&1 /dev/null
+exec $SHELL
