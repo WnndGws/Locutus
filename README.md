@@ -1,6 +1,6 @@
 # Locutus
 
-Still in v0.x. Use at your own risk Ammar. When i think it is ready to be used i will make a v1.0 release.
+Still in v0.x. Use at your own risk. When i think it is ready to be used i will make a v1.0 release.
 
 Cleaned up version of my data and gmail backup script. 
 
