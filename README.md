@@ -14,6 +14,7 @@ Built ontop of
 
 This is a bash script and runs as such. 
 Step to use:
+
  0) Run Deja-dup using it's gui to set up the first backup
      * This is the prefered way of doing it, as it has a series of good best practices in place, instead of me having to write them again
  1) Edit the configuration section at the beginning of file "locutus.sh" using your favourite text editor
