@@ -1,9 +1,3 @@
-# Branch Details
-
-The point of this branch is to change the way the backup is done. Will create a base and compare to that. Will be much slower, but will mean that uploads will be smaller. Will compare the trade-off and decide if want to pull
-
-Issue #21
-
 # Locutus
 
 Still in v0.x. Use at your own risk Ammar. When i think it is ready to be used i will make a v1.0 release.
@@ -11,7 +5,7 @@ Still in v0.x. Use at your own risk Ammar. When i think it is ready to be used i
 Cleaned up version of my data and gmail backup script. 
 
 Built ontop of
-* rsync
+* deja-dup (duplicity)
 * gmvault
 * aconfmgr
 * megasync
@@ -20,6 +14,8 @@ Built ontop of
 
 This is a bash script and runs as such. 
 Step to use:
+ 0) Run Deja-dup using it's gui to set up the first backup
+     * This is the prefered way of doing it, as it has a series of good best practices in place, instead of me having to write them again
  1) Edit the configuration section at the beginning of file "locutus.sh" using your favourite text editor
  2) Create a .passwords file using the .passwords.example as a template
     * NB! This file contains SENSITIVE INFORMATION. That is why it is imperative that you encrypt it using gpg
