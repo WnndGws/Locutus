@@ -57,7 +57,7 @@ fi
 base_path=$(which deja-dup)
 if [ "$base_path" = "deja-dup not found" ]
 then
-    echo "ERROR: rsync not found"; exit 1;
+    echo "ERROR: deja-dup not found"; exit 1;
 fi
 
 if [ -z $gmv_path ]
