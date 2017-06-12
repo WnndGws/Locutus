@@ -76,7 +76,7 @@ notify-send "Backup Started"
 crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
 ## Backup using deja-dup
-deja-dup --backup 2>&1 /dev/null
+dbus-launch deja-dup --backup --display=:0.0 2>&1 /dev/null
 
 # Backup Gmail using gmvault
 set -a
@@ -126,7 +126,7 @@ fi
 ##     cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
 #
 find -iname "*.tmp" -delete
-
+pkill deja-dup
 touch /home/wynand/ran
 
 ## to clear imported variables when script quits, to attempt to prevent passwords being taken
