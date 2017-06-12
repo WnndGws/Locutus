@@ -1,4 +1,5 @@
 #!/bin/bash
+export DISPLAY=:0.0
 
 # ---------------------------------- #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
@@ -88,7 +89,6 @@ expect <<- DONE
     match_max 100000
     expect -re {Please enter gmail password for }
     send "$GOOGLE_PASSPHRASE"
-    unset GOOGLE_PASSPHRASE
     send -- "\r"
     expect eof
 DONE
@@ -107,7 +107,6 @@ expect <<- DONE
     match_max 100000
     expect -re {\[0m\[sudo\] password for }
     send "$SUDO_PASSPHRASE"
-    unset SUDO_PASSPHRASE
     send -- "\r"
     expect eof
 DONE
@@ -127,7 +126,9 @@ fi
 ##     cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
 #
 find -iname "*.tmp" -delete
-#
+
+touch /home/wynand/ran
+
 ## to clear imported variables when script quits, to attempt to prevent passwords being taken
 exec bash 2>&1 /dev/null
 exec $SHELL
