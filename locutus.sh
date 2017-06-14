@@ -127,7 +127,6 @@ fi
 #
 find -iname "*.tmp" -delete
 pkill deja-dup
-touch /home/wynand/ran
 
 ## to clear imported variables when script quits, to attempt to prevent passwords being taken
 exec bash 2>&1 /dev/null
