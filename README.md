@@ -5,7 +5,7 @@ Still in v0.x. Use at your own risk. When I think it is ready to be used I will 
 Cleaned up version of my data and gmail backup script. 
 
 Built ontop of
-* deja-dup (duplicity)
+* duplicity
 * gmvault
 * aconfmgr
 * megasync
