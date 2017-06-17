@@ -10,10 +10,14 @@ backup_location="/wynZFS/Wynand/Backups"
 
 # Backup folders (RELATIVE TO backup_location)
 acm_save_location="/aconfmgr"
+dup_save_location="/Duplicity"
 gmv_save_location="/Gmail"
 
 # Folder(s) to backup (FULL PATH)(Comma seperated list)
 backed_up_files="/home"
+
+# Exluded pattern(s) during backup
+excluded_list="**[Ss]team**, **[Cc]ache**, **wynZFS**, **GoogleDrive**"
 
 #Location of passwords file (FULL PATH)
 password_file_location="/home/wynand/.dotfiles/.passwords.asc"
@@ -55,10 +59,10 @@ then
     fi
 fi
 
-base_path=$(which deja-dup)
-if [ "$base_path" = "deja-dup not found" ]
+base_path=$(which duplicity)
+if [ "$base_path" = "duplicity not found" ]
 then
-    echo "ERROR: deja-dup not found"; exit 1;
+    echo "ERROR: duplicity not found"; exit 1;
 fi
 
 if [ -z $gmv_path ]
@@ -75,14 +79,28 @@ notify-send "Backup Started"
 # Backup my crontab
 crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
 
-## Backup using deja-dup
-dbus-launch deja-dup --backup --display=:0.0 2>&1 /dev/null
+# Backup using duplicity
+excluded_list=${excluded_list//\,/}
+echo $excluded_list | tr " " "\n" > ./.excluded.tmp
+
+set -a
+source <(gpg -qd $password_file_location)
+set +a
+unset GOOGLE_PASSPHRASE
+unset SUDO_PASSPHRASE
+
+PASSPHRASE="$echo $BACKUP_PASSPHRASE" duplicity --progress --exclude-filelist ./.excluded.tmp $backed_up_files file://$backup_location$dup_save_location
+PASSPHRASE="$echo $BACKUP_PASSPHRASE" duplicity verify file://$backup_location$dup_save_location $backed_up_files
+unset PASSHPHRASE
+unset BACKUP_PASSPHRASE
+
 
 # Backup Gmail using gmvault
 set -a
 source <(gpg -qd $password_file_location)
 set +a
 unset SUDO_PASSPHRASE
+unset BACKUP_PASSPHRASE
 expect <<- DONE
     set timeout -1
     spawn $gmv_path sync --emails-only -e -d $gmv_save_location $email_address -p
@@ -101,6 +119,7 @@ set -a
 source <(gpg -qd $password_file_location)
 set +a
 unset GOOGLE_PASSPHRASE
+unset BACKUP_PASSPHRASE
 expect <<- DONE
     set timeout -1
     spawn aconfmgr -c $acm_save_location save

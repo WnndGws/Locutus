@@ -1,0 +1,6 @@
+## This is the procedure to take to restore. Will code-fy it in time
+
+# 01) pacaur -S aconfmgr-git
+# 02) cd into the aconfmgr folder
+# 03) aconfmgr apply -c .
+# 04) copy /home from backup to the disk
