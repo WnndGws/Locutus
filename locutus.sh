@@ -24,6 +24,7 @@ password_file_location="/home/wynand/.dotfiles/.passwords.asc"
 
 #Path to cloud upload application (I prefer to use the official apps instead of a cli, as these apps have been optimised for the OS, and allows you to set up where to back the data up etc.)
 cloud_path="/usr/bin/megasync"
+mega_user="wynand.gouws.wg@gmail.com"
 
 ## >>>>>>>>>>>>>>>>>>>>>>>>>> ACONF SETTINGS <<<<<<<<<<<<<<<<<<<<<<<<<<< ##
 # Aconfmgr (FULL PATH)(leave BLANK for default)
@@ -91,8 +92,10 @@ unset GOOGLE_PASSPHRASE
 unset SUDO_PASSPHRASE
 
 PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist ./.excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> ./.backupcheck.tmp
+PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist ./.excluded.tmp $backed_up_files mega://$mega_user:$MEGA_PASSPHRASE@mega.co.nz/Backups
 unset PASSPHRASE
 unset BACKUP_PASSPHRASE
+unset MEGA_PASSPHRASE
 
 if grep 'Errors.*[1-]' ./.backupcheck.tmp
 then
