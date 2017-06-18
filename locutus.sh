@@ -92,10 +92,8 @@ unset GOOGLE_PASSPHRASE
 unset SUDO_PASSPHRASE
 
 PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist ./.excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> ./.backupcheck.tmp
-PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist ./.excluded.tmp $backed_up_files mega://$mega_user:$MEGA_PASSPHRASE@mega.co.nz/Backups
 unset PASSPHRASE
 unset BACKUP_PASSPHRASE
-unset MEGA_PASSPHRASE
 
 if grep 'Errors.*[1-]' ./.backupcheck.tmp
 then
@@ -157,6 +155,9 @@ echo "Copying........."
 #
 find . -iname "*.tmp" -delete
 
-## to clear imported variables when script quits, to attempt to prevent passwords being taken
+# Upload to whatever cloud using the linux gui for whatever it is. In my case it's Mega
+megasync
+
+# To clear imported variables when script quits, to attempt to prevent passwords being taken
 exec bash 2>&1 /dev/null
 exec $SHELL
