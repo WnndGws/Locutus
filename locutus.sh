@@ -17,7 +17,7 @@ gmv_save_location="/Gmail"
 backed_up_files="/home"
 
 # Exluded pattern(s) during backup
-excluded_list="**[Ss]team**, **[Cc]ache**, **wynZFS**, **GoogleDrive**"
+excluded_list="**[Ss]team**, **[Cc]ache**, **wynZFS**"
 
 #Location of passwords file (FULL PATH)
 password_file_location="/home/wynand/.dotfiles/.passwords.asc"
@@ -83,17 +83,25 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
 excluded_list=${excluded_list//\,/}
 echo $excluded_list | tr " " "\n" > ./.excluded.tmp
 
+duplicity_backup () {
 set -a
 source <(gpg -qd $password_file_location)
 set +a
 unset GOOGLE_PASSPHRASE
 unset SUDO_PASSPHRASE
 
-PASSPHRASE="$echo $BACKUP_PASSPHRASE" duplicity --progress --exclude-filelist ./.excluded.tmp $backed_up_files file://$backup_location$dup_save_location
-PASSPHRASE="$echo $BACKUP_PASSPHRASE" duplicity verify file://$backup_location$dup_save_location $backed_up_files
-unset PASSHPHRASE
+PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist ./.excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> ./.backupcheck.tmp
+unset PASSPHRASE
 unset BACKUP_PASSPHRASE
 
+if grep 'Errors.*[1-]' ./.backupcheck.tmp
+then
+    find $backup_location$dup_save_location/* -cmin -60 -delete
+    duplicity_backup
+fi
+}
+
+duplicity_backup
 
 # Backup Gmail using gmvault
 set -a
@@ -139,13 +147,12 @@ then
     sed -i '/--foreign/d' "$acm_save_location"/02-Packages.sh
     rm -f "$acm_save_location"/99-unsorted.sh
 fi
+
+# Copy to External Drive
+echo "Copying........."
+#     cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
 #
-## Copy to External Drive
-#echo "Copying........."
-##     cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
-#
-find -iname "*.tmp" -delete
-pkill deja-dup
+find . -iname "*.tmp" -delete
 
 ## to clear imported variables when script quits, to attempt to prevent passwords being taken
 exec bash 2>&1 /dev/null
