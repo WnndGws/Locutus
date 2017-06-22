@@ -1,5 +1,5 @@
 #!/bin/bash
-export DISPLAY=:0.0
+#export DISPLAY=:0.0
 
 # ---------------------------------- #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
@@ -82,7 +82,7 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
 
 # Backup using duplicity
 excluded_list=${excluded_list//\,/}
-echo $excluded_list | tr " " "\n" > ./.excluded.tmp
+echo $excluded_list | tr " " "\n" > .excluded.tmp
 
 duplicity_backup () {
 set -a
@@ -91,11 +91,11 @@ set +a
 unset GOOGLE_PASSPHRASE
 unset SUDO_PASSPHRASE
 
-PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist ./.excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> ./.backupcheck.tmp
+PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist .excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> .backupcheck.tmp
 unset PASSPHRASE
 unset BACKUP_PASSPHRASE
 
-if grep 'Errors.*[1-]' ./.backupcheck.tmp
+if grep 'Errors.*[1-]' .backupcheck.tmp
 then
     find $backup_location$dup_save_location/* -cmin -60 -delete
     duplicity_backup
@@ -111,13 +111,13 @@ set +a
 unset SUDO_PASSPHRASE
 unset BACKUP_PASSPHRASE
 expect <<- DONE
-    set timeout -1
-    spawn $gmv_path sync --emails-only -e -d $gmv_save_location $email_address -p
-    match_max 100000
-    expect -re {Please enter gmail password for }
-    send "$GOOGLE_PASSPHRASE"
-    send -- "\r"
-    expect eof
+   set timeout -1
+   spawn $gmv_path sync --emails-only -e -d $gmv_save_location $email_address -p
+   match_max 100000
+   expect -re {Please enter gmail password for }
+   send "$GOOGLE_PASSPHRASE"
+   send -- "\r"
+   expect eof
 DONE
 
 rm -rf "$acm_save_location"/files
@@ -130,23 +130,23 @@ set +a
 unset GOOGLE_PASSPHRASE
 unset BACKUP_PASSPHRASE
 expect <<- DONE
-    set timeout -1
-    spawn aconfmgr -c $acm_save_location save
-    match_max 100000
-    expect -re {\[0m\[sudo\] password for }
-    send "$SUDO_PASSPHRASE"
-    send -- "\r"
-    expect eof
+   set timeout -1
+   spawn aconfmgr -c $acm_save_location save
+   match_max 100000
+   expect -re {\[0m\[sudo\] password for }
+   send "$SUDO_PASSPHRASE"
+   send -- "\r"
+   expect eof
 DONE
 
 if [ -f "$acm_save_location"/99-unsorted.sh ];
 then
-    cat "$acm_save_location"/99-unsorted.sh | grep 'C.*File ' >> 98.tmp; cat "$acm_save_location"/99-unsorted.sh | grep 'C.*Link ' >> 98.tmp; sort 98.tmp | uniq -u >> "$acm_save_location"/04-AddFiles.sh; rm -f 98.tmp
-    cat "$acm_save_location"/99-unsorted.sh | grep 'AddPackage ' >> 98.tmp; sort 98.tmp | uniq -u >> "$acm_save_location"/02-Packages.sh; rm -f 98.tmp
-    cat "$acm_save_location"/99-unsorted.sh | grep 'RemovePackage ' >> 98.tmp; sort 98.tmp | uniq -u >> "$acm_save_location"/05-RemovePackages.sh; rm -f 98.tmp
-    cat "$acm_save_location"/02-Packages.sh | grep 'foreign' >> 98.tmp; sort 98.tmp | uniq -u >> "$acm_save_location"/03-ForeignPackages.sh; rm -f 98.tmp
-    sed -i '/--foreign/d' "$acm_save_location"/02-Packages.sh
-    rm -f "$acm_save_location"/99-unsorted.sh
+   cat "$acm_save_location"/99-unsorted.sh | grep 'C.*File ' >> 98.tmp; cat "$acm_save_location"/99-unsorted.sh | grep 'C.*Link ' >> 98.tmp; sort 98.tmp | uniq -u >> "$acm_save_location"/04-AddFiles.sh; rm -f 98.tmp
+   cat "$acm_save_location"/99-unsorted.sh | grep 'AddPackage ' >> 98.tmp; sort 98.tmp | uniq -u >> "$acm_save_location"/02-Packages.sh; rm -f 98.tmp
+   cat "$acm_save_location"/99-unsorted.sh | grep 'RemovePackage ' >> 98.tmp; sort 98.tmp | uniq -u >> "$acm_save_location"/05-RemovePackages.sh; rm -f 98.tmp
+   cat "$acm_save_location"/02-Packages.sh | grep 'foreign' >> 98.tmp; sort 98.tmp | uniq -u >> "$acm_save_location"/03-ForeignPackages.sh; rm -f 98.tmp
+   sed -i '/--foreign/d' "$acm_save_location"/02-Packages.sh
+   rm -f "$acm_save_location"/99-unsorted.sh
 fi
 
 # Copy to External Drive
