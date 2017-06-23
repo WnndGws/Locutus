@@ -1,5 +1,5 @@
 #!/bin/bash
-export DISPLAY=:0.0
+# export DISPLAY=:0.0
 
 # ---------------------------------- #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
@@ -153,7 +153,7 @@ fi
 echo "Copying........."
 #     cp -Lruv /home/wynand/wynZFS/Wynand/Backups /run/media/wynand/Wyntergos_Backups
 #
-find . -iname "*.tmp" -delete
+find $backup_location -iname "*.tmp" -delete
 
 # Upload to whatever cloud using the linux gui for whatever it is. In my case it's Mega
 megasync
