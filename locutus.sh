@@ -1,5 +1,5 @@
 #!/bin/bash
-#export DISPLAY=:0.0
+export DISPLAY=:0.0
 
 # ---------------------------------- #
 # >>>>> CONFIGURATION SETTINGS <<<<< #
@@ -82,7 +82,7 @@ crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos
 
 # Backup using duplicity
 excluded_list=${excluded_list//\,/}
-echo $excluded_list | tr " " "\n" > .excluded.tmp
+echo $excluded_list | tr " " "\n" > $backup_location/.excluded.tmp
 
 duplicity_backup () {
 set -a
@@ -91,11 +91,11 @@ set +a
 unset GOOGLE_PASSPHRASE
 unset SUDO_PASSPHRASE
 
-PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist .excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> .backupcheck.tmp
+PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist $backup_location/.excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> $backup_location/.backupcheck.tmp
 unset PASSPHRASE
 unset BACKUP_PASSPHRASE
 
-if grep 'Errors.*[1-]' .backupcheck.tmp
+if grep 'Errors.*[1-]' $backup_location/.backupcheck.tmp
 then
     find $backup_location$dup_save_location/* -cmin -60 -delete
     duplicity_backup
