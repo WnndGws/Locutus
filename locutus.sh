@@ -159,7 +159,6 @@ find $backup_location -iname "*.tmp" -delete
 # Upload to whatever cloud using the linux gui for whatever it is. In my case it's Mega
 megasync
 
-notify-send "Backup Completed"
 # To clear imported variables when script quits, to attempt to prevent passwords being taken
 exec bash 2>&1 /dev/null
 exec $SHELL
