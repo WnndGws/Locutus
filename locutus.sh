@@ -76,6 +76,7 @@ then
 fi
 
 notify-send "Backup Started"
+find $backup_location -iname "*.tmp" -delete
 
 # Backup my crontab
 crontab -l > /home/wynand/GoogleDrive/01_Personal/05_Software/Antergos/wyntergos_crontab
