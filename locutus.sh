@@ -61,13 +61,19 @@ locutusBackup() {
         echo "ERROR: expect not found"; exit 1;
     fi
 
-    if [ -z $acm_path ]
+	if uname -r | grep -q 'ARCH'
     then
-        acm_path=$(which aconfmgr)
-        if [ "$acm_path" = "aconfmgr not found" ]
-        then
-            echo "ERROR: aconfmgr not found"; exit 1;
-        fi
+		# Do Arch specific stuff
+		if [ -z $acm_path ]
+		then
+		    acm_path=$(which aconfmgr)
+		    if [ "$acm_path" = "aconfmgr not found" ]
+		    then
+		        echo "ERROR: aconfmgr not found"; exit 1;
+		    fi
+		fi
+    else
+        # Do generic stuff for non-Arch systems
     fi
 
     base_path=$(which duplicity)
