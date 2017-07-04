@@ -73,7 +73,7 @@ locutusBackup() {
 		    fi
 		fi
     else
-        # Do generic stuff for non-Arch systems
+        echo "Package management not performed. Arch-based system is required."
     fi
 
     base_path=$(which duplicity)
