@@ -6,7 +6,7 @@ export DISPLAY=:0.0
 # ---------------------------------- #
 
 # Backups save location (FULL PATH)
-backup_location="/wynZFS/Wynand/Backups"
+backup_location="/home/wynand/wynZFS/Wynand/Backups"
 
 # Backup folders (RELATIVE TO backup_location)
 acm_save_location="/aconfmgr"
@@ -96,24 +96,23 @@ locutusBackup() {
     echo $excluded_list | tr " " "\n" >> $backup_location/.excluded.tmp
 
     duplicity_backup () {
-    set -a
-    source <(gpg -qd $password_file_location)
-    set +a
-    unset GOOGLE_PASSPHRASE
-    unset SUDO_PASSPHRASE
+        echo "Backing up files......."
+        set -a
+        source <(gpg -qd $password_file_location)
+        set +a
+        unset GOOGLE_PASSPHRASE
+        unset SUDO_PASSPHRASE
 
-    PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist $backup_location/.excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> $backup_location/.backupcheck.tmp
-    unset PASSPHRASE
-    unset BACKUP_PASSPHRASE
+        PASSPHRASE="$BACKUP_PASSPHRASE" duplicity --exclude-filelist $backup_location/.excluded.tmp $backed_up_files file://$backup_location$dup_save_location &> $backup_location/.backupcheck.tmp
+        unset PASSPHRASE
+        unset BACKUP_PASSPHRASE
 
-    if grep 'Errors.*[1-]' $backup_location/.backupcheck.tmp
-    then
-        find $backup_location$dup_save_location/* -cmin -60 -delete
-        duplicity_backup
-    fi
+        if grep 'Errors.*[1-]' $backup_location/.backupcheck.tmp
+        then
+            find $backup_location$dup_save_location/* -cmin -60 -delete
+            duplicity_backup
+        fi
     }
-
-    duplicity_backup
 
     # Backup Gmail using gmvault
     set -a
@@ -133,6 +132,8 @@ DONE
 
     rm -rf "$acm_save_location"/files
     rm -f "$acm_save_location"/04-AddFiles.sh
+
+    duplicity_backup
 
     # Save packages and configurations using aconfmgr
     set -a
