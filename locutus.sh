@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 export DISPLAY=:0.0
 
 # ---------------------------------- #
@@ -114,6 +114,8 @@ locutusBackup() {
         fi
     }
 
+    duplicity_backup
+
     # Backup Gmail using gmvault
     set -a
     source <(gpg -qd $password_file_location)
@@ -132,8 +134,6 @@ DONE
 
     rm -rf "$acm_save_location"/files
     rm -f "$acm_save_location"/04-AddFiles.sh
-
-    duplicity_backup
 
     # Save packages and configurations using aconfmgr
     set -a
